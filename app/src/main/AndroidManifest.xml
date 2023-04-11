@@ -5,7 +5,8 @@
     <uses-sdk android:minSdkVersion="23" />
 
     <uses-feature android:name="android.hardware.usb.accessory" />
-<!--    <uses-permission android:name="com.emureka.serialandbluetooth.USB_PERMISSION" />-->
+
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <application
         android:allowBackup="true"
@@ -16,11 +17,14 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.SerialAndBluetooth"
         tools:targetApi="31">
-        <activity
-            android:name=".SerialCommunication"
+
+        <service
+            android:name=".service.Bird"
             android:exported="false"
-            android:label="@string/title_activity_serial_communication"
-            android:theme="@style/Theme.SerialAndBluetooth.NoActionBar" />
+            android:foregroundServiceType="camera">
+
+        </service>
+
         <activity
             android:name=".MainActivity"
             android:exported="true"

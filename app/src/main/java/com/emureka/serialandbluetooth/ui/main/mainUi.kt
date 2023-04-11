@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
@@ -16,13 +17,20 @@ import androidx.compose.ui.unit.sp
 import com.emureka.serialandbluetooth.R
 import com.emureka.serialandbluetooth.ui.theme.SerialAndBluetoothTheme
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
+
+enum class Content {
+    MAIN, CAMERA, CONNECT
+}
 
 @Composable
 fun MainUi(darkTheme: Boolean,
            onDarkThemeChange: (Boolean) -> Unit,
            soundEnable: Boolean,
            onSoundEnableChange: (Boolean) -> Unit,
+           onContentChange: (Content) -> Unit,
+           content: @Composable BoxScope.(ScaffoldState) -> Unit = { _ -> }
 ) {
 
     SerialAndBluetoothTheme(darkTheme = darkTheme) {
@@ -38,26 +46,69 @@ fun MainUi(darkTheme: Boolean,
 
             // Navigation Drawer
             drawerContent = {
-                Drawer(scope = scope, scaffoldState = scaffoldState) {
-                    DrawerSwitch(
-                        icon = ImageVector.vectorResource(id = R.drawable.moon),
-                        description = "Dark Theme",
-                        checked = darkTheme,
-                        onCheckedChange = onDarkThemeChange
-                    )
+                Text(
+                    text = "Tools",
+                    fontSize = 20.sp,
+                    modifier = Modifier.padding(16.dp)
+                )
 
-                    DrawerSwitch(
-                        icon = ImageVector.vectorResource(id = R.drawable.sound),
-                        description = "Sound",
-                        checked = soundEnable,
-                        onCheckedChange = onSoundEnableChange
-                    )
+                Divider()
+
+                DrawerButton(
+                    text = "Home",
+                    icon = Icons.Filled.Home
+                ) {
+                    // callback
+                    onContentChange(Content.MAIN)
+
+                    // close drawer
+                    scope.launch {
+                        scaffoldState.drawerState.close()
+                    }
                 }
-            },
+
+                DrawerButton(text = "Add Devices", icon = Icons.Filled.Add) {
+                    // callback
+                    onContentChange(Content.CONNECT)
+
+                    // close drawer
+                    scope.launch {
+                        scaffoldState.drawerState.close()
+                    }
+                }
+
+                DrawerButton(
+                    text = "Camera View",
+                    icon = ImageVector.vectorResource(id = R.drawable.camera)
+                ) {
+                    // callback
+                    onContentChange(Content.CAMERA)
+
+                    // close drawer
+                    scope.launch {
+                        scaffoldState.drawerState.close()
+                    }
+                }
+
+                DrawerSwitch(
+                    icon = ImageVector.vectorResource(id = R.drawable.moon),
+                    description = "Dark Theme",
+                    checked = darkTheme,
+                    onCheckedChange = onDarkThemeChange
+                )
+
+                DrawerSwitch(
+                    icon = ImageVector.vectorResource(id = R.drawable.sound),
+                    description = "Sound",
+                    checked = soundEnable,
+                    onCheckedChange = onSoundEnableChange
+                )
+            }, // end of drawer
         ) {
+
             // Main content
             Box(modifier = Modifier.padding(it)) {
-                Text("Hello")
+                content(scaffoldState)
             }
         }
     }
@@ -79,39 +130,8 @@ fun AppBar(scope: CoroutineScope, scaffoldState: ScaffoldState) {
             ) {
                 Icon(Icons.Filled.Menu, contentDescription = "Navigation Icon")
             }
-
         }
     )
-}
-
-@Composable
-fun Drawer(
-    scope: CoroutineScope,
-    scaffoldState: ScaffoldState,
-    content: @Composable () -> Unit = {}
-) {
-    Text(
-        text = "Tools",
-        fontSize = 20.sp,
-        modifier = Modifier.padding(16.dp)
-    )
-    Divider()
-
-    DrawerButton(
-        text = "System State",
-        icon = Icons.Filled.Settings
-    ) {
-
-        scope.launch {
-            scaffoldState.drawerState.close()
-        }
-    }
-    DrawerButton(text = "Add Devices", icon = Icons.Filled.Add) {
-        scope.launch {
-            scaffoldState.drawerState.close()
-        }
-    }
-    content()
 }
 
 @Composable
@@ -125,7 +145,7 @@ fun DrawerButton(text: String, icon: ImageVector, onClick: () -> Unit = {}) {
         Icon(
             icon,
             contentDescription = text,
-            modifier = Modifier.fillMaxHeight()
+            modifier = Modifier.size(28.dp)
         )
         Text(
             text,
