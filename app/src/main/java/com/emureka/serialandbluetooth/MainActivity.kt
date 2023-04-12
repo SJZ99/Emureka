@@ -40,11 +40,7 @@ class MainActivity : ComponentActivity() {
                 onSoundEnableChange = { soundEnable = it },
                 onContentChange = { content = it },
             ) { scaffoldState ->
-//                Button(onClick = {
-//
-//                }) {
-//                    Text(text = "chirp")
-//                }
+
                 when(content) {
                     // Home
                     Content.MAIN -> {
@@ -63,9 +59,7 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
-        createNotificationChannel()
-        startService(Intent(this, Bird::class.java))
 
-        Log.i("USB", "ok")
+        startService(Intent(this, Bird::class.java))
     }
 }

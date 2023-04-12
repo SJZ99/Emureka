@@ -18,10 +18,6 @@ class Bird : Service() {
     private lateinit var serviceJob: Job
     private lateinit var serviceScope: CoroutineScope
 
-    companion object {
-        private const val NOTIFICATION_ID = 999637
-    }
-
     override fun onBind(intent: Intent?): IBinder? { return null }
 
     override fun onCreate() {
@@ -34,8 +30,6 @@ class Bird : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
-
-        Log.i("USB", "d")
 
         serviceScope.launch {
             while(true) {
