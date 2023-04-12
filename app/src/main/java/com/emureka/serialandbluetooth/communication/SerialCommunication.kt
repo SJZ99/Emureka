@@ -6,6 +6,9 @@ import android.hardware.usb.UsbAccessory
 import android.hardware.usb.UsbManager
 import android.util.Log
 import androidx.activity.ComponentActivity
+import java.io.FileDescriptor
+import java.io.FileInputStream
+import java.io.FileOutputStream
 
 class SerialCommunication(
     private val activity: ComponentActivity
@@ -57,4 +60,19 @@ class SerialCommunication(
 
         usbManager.requestPermission(accessory, permissionIntent)
     }
+
+//    private fun openAccessory(accessory: UsbAccessory) {
+//
+//        Log.d("USB", "openAccessory: $accessory")
+//        val fileDescriptor = usbManager.openAccessory(accessory)
+//        val inputStream: FileInputStream
+//        val outputStream: FileOutputStream
+//        if (fileDescriptor != null) {
+//            val fd: FileDescriptor = fileDescriptor.fileDescriptor
+//            inputStream = FileInputStream(fd)
+//            outputStream = FileOutputStream(fd)
+//            val thread = Thread(null, this, "AccessoryThread")
+//            thread.start()
+//        }
+//    }
 }
