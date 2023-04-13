@@ -2,8 +2,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <uses-sdk android:minSdkVersion="23" />
-
     <uses-feature android:name="android.hardware.usb.accessory" />
 
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
@@ -15,20 +13,24 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/Theme.SerialAndBluetooth"
-        tools:targetApi="31">
+        android:theme="@style/Theme.SerialAndBluetooth">
+
+        <service
+            android:name=".service.SerialConnectionService"
+            android:enabled="true"
+            android:exported="false"
+            android:permission="TODO">
+        </service>
 
         <service
             android:name=".service.Bird"
             android:exported="false"
             android:foregroundServiceType="camera">
-
         </service>
 
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:label="@string/app_name"
             android:theme="@style/Theme.SerialAndBluetooth">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

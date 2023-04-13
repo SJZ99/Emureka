@@ -18,6 +18,8 @@ import com.emureka.serialandbluetooth.service.Bird
 import com.emureka.serialandbluetooth.ui.main.Connect
 import com.emureka.serialandbluetooth.ui.main.Content
 import com.emureka.serialandbluetooth.ui.main.MainUi
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
 

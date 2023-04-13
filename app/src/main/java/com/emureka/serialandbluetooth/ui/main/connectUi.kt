@@ -1,6 +1,7 @@
 package com.emureka.serialandbluetooth.ui.main
 
 import android.hardware.usb.UsbAccessory
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -34,7 +35,10 @@ fun Connect(
 }
 
 @Composable
-fun DevicesList(list: List<UsbAccessory>, serial: SerialCommunication) {
+fun DevicesList(
+    list: List<UsbAccessory>,
+    serial: SerialCommunication,
+) {
     list.forEach {
         DevicesListItem(
             name = it.model,

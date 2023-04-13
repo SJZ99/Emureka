@@ -6,6 +6,7 @@ import android.hardware.usb.UsbAccessory
 import android.hardware.usb.UsbManager
 import android.util.Log
 import androidx.activity.ComponentActivity
+import com.emureka.serialandbluetooth.service.SerialConnectionService
 import java.io.FileDescriptor
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -27,7 +28,12 @@ class SerialCommunication(
 
                     if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
                         accessory?.apply {
-                            // set up device here!!!!!!!!!!!!!!!!!!!!!!
+                            // create a intent which contain a usbAccessory
+                            val intent = Intent(activity, SerialConnectionService::class.java)
+                            intent.putExtra("Accessory", accessory)
+
+                            // start service
+                            activity.startService(intent)
                         }
                     } else {
                         Log.d(ContentValues.TAG, "permission denied for accessory $accessory")
@@ -61,18 +67,4 @@ class SerialCommunication(
         usbManager.requestPermission(accessory, permissionIntent)
     }
 
-//    private fun openAccessory(accessory: UsbAccessory) {
-//
-//        Log.d("USB", "openAccessory: $accessory")
-//        val fileDescriptor = usbManager.openAccessory(accessory)
-//        val inputStream: FileInputStream
-//        val outputStream: FileOutputStream
-//        if (fileDescriptor != null) {
-//            val fd: FileDescriptor = fileDescriptor.fileDescriptor
-//            inputStream = FileInputStream(fd)
-//            outputStream = FileOutputStream(fd)
-//            val thread = Thread(null, this, "AccessoryThread")
-//            thread.start()
-//        }
-//    }
 }
