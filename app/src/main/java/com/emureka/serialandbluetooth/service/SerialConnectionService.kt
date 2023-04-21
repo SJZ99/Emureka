@@ -38,8 +38,8 @@ class SerialConnectionService : Service() {
             inputStream = FileInputStream(fd)
             outputStream = FileOutputStream(fd)
 
-            // communication here
             scope.launch {
+                // communicate with USB accessory
 
             }
         }

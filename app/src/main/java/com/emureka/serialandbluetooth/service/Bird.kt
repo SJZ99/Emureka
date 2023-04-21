@@ -1,18 +1,18 @@
 package com.emureka.serialandbluetooth.service
 
-import android.app.Notification
-import android.app.NotificationManager
 import android.app.Service
+import android.content.Context
 import android.content.Intent
-import android.hardware.usb.UsbAccessory
 import android.media.MediaPlayer
 import android.os.IBinder
-import android.util.Log
-import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
+import androidx.datastore.preferences.core.intPreferencesKey
+import com.emureka.serialandbluetooth.MyDataStore
 import com.emureka.serialandbluetooth.R
+import com.emureka.serialandbluetooth.Setting
 import kotlinx.coroutines.*
-
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.map
 
 class Bird : Service() {
     private lateinit var bird: MediaPlayer
@@ -24,16 +24,16 @@ class Bird : Service() {
         super.onCreate()
         bird = MediaPlayer.create(this, R.raw.bird)
         serviceScope = CoroutineScope(Dispatchers.IO)
-
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
 
         serviceScope.launch {
+            val dataStore = MyDataStore.getInstance(this@Bird)
             while(true) {
-//                bird.start()
-                delay(8000)
+                // if camera say yes then chirp
+
             }
         }
         return START_STICKY
