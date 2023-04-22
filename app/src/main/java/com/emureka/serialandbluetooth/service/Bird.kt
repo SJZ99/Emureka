@@ -10,6 +10,7 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import com.emureka.serialandbluetooth.MyDataStore
 import com.emureka.serialandbluetooth.R
 import com.emureka.serialandbluetooth.Setting
+import com.emureka.serialandbluetooth.communication.SerialCommunication
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 
@@ -17,6 +18,7 @@ class Bird : Service() {
     private lateinit var bird: MediaPlayer
     private lateinit var serviceScope: CoroutineScope
     private var isSoundOn = false
+    private lateinit var serial: SerialCommunication
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -24,6 +26,7 @@ class Bird : Service() {
         super.onCreate()
         bird = MediaPlayer.create(this, R.raw.bird)
         serviceScope = CoroutineScope(Dispatchers.IO)
+        serial = SerialCommunication(this)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -35,13 +38,11 @@ class Bird : Service() {
                 this@Bird.isSoundOn = it.isSoundOn
 //                Log.i("USB", "${this@Bird.isSoundOn}")
             }
-
+            serial.openDevice()
             while(true) {
-                // if camera say yes then chirp
-//                if(this@Bird.isSoundOn) {
-                    bird.start()
-                    delay(7000)
-//                }
+                serial.write("Hello\n")
+                Log.i("USB", serial.read());
+
             }
         }
         return START_STICKY

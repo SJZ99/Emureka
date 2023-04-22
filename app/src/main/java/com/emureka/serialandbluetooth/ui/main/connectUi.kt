@@ -23,20 +23,20 @@ fun Connect(
     serial: SerialCommunication,
     scaffoldState: ScaffoldState,
 ) {
-    val list = serial.getAccessoryList()
-    if(list.isNotEmpty()) {
-        // show devices list
-        DevicesList(list = list, serial = serial)
-    } else {
-        // show snack-bar to notify no device found
-        LaunchedEffect(scaffoldState.snackbarHostState) {
-            scaffoldState.snackbarHostState.showSnackbar(
-                "No devices found!",
-                "OK",
-                SnackbarDuration.Long
-            )
-        }
-    }
+//    val list = serial.getAccessoryList()
+//    if(list.isNotEmpty()) {
+//        // show devices list
+//        DevicesList(list = list, serial = serial)
+//    } else {
+//        // show snack-bar to notify no device found
+//        LaunchedEffect(scaffoldState.snackbarHostState) {
+//            scaffoldState.snackbarHostState.showSnackbar(
+//                "No devices found!",
+//                "OK",
+//                SnackbarDuration.Long
+//            )
+//        }
+//    }
 }
 
 @Composable
@@ -49,7 +49,7 @@ fun DevicesList(
             name = it.model,
             description = (it.description ?: it.model)
         ) {
-            serial.requestUsbPermission(it)
+//            serial.requestUsbPermission(it)
         }
     }
 }

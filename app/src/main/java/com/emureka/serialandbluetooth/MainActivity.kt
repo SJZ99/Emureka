@@ -61,10 +61,15 @@ class MainActivity : ComponentActivity() {
                 when(content) {
                     // Home
                     Content.MAIN -> {
-                        Button(onClick = { dataStore.updateIsActive(!setting.value.isEmuActive) }) {
+                        Button(onClick = {
+                            dataStore.updateIsActive(!setting.value.isEmuActive)
+                            startService(Intent(this@MainActivity, Bird::class.java))
+                        }) {
                             Text("EMUUUUU")
+
                         }
                         MainUi(isActive = setting.value.isEmuActive)
+
                     }
 
                     // Connect (USB and bluetooth)
@@ -80,6 +85,6 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        startService(Intent(this, Bird::class.java))
+
     }
 }
