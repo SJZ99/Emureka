@@ -3,6 +3,7 @@ package com.emureka.serialandbluetooth.communication
 import android.app.PendingIntent
 import android.content.*
 import android.hardware.usb.UsbAccessory
+import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -28,6 +29,8 @@ class SerialCommunication(
 
                     if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
                         accessory?.apply {
+
+                            Log.i("USB", "${this.description} ${this.model}")
                             // create a intent which contain a usbAccessory
                             val intent = Intent(activity, SerialConnectionService::class.java)
                             intent.putExtra("Accessory", accessory)
@@ -51,6 +54,19 @@ class SerialCommunication(
         if(array != null && array.isNotEmpty()) {
             array.forEach {
                 list.add(it)
+            }
+        }
+        return list.toList()
+    }
+
+    fun getDeviceList(): List<UsbDevice> {
+        val list = mutableListOf<UsbDevice>()
+        val array = usbManager.deviceList
+
+        // from java, need check null
+        if(array != null && array.isNotEmpty()) {
+            array.forEach {
+                list.add(it.value)
             }
         }
         return list.toList()

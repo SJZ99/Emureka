@@ -42,6 +42,7 @@ class MainActivity : ComponentActivity() {
 
         val serial = SerialCommunication(this)
 
+
         dataStore = MyDataStore.getInstance(this)
         setContent {
 

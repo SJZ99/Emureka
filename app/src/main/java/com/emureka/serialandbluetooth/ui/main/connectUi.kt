@@ -1,6 +1,7 @@
 package com.emureka.serialandbluetooth.ui.main
 
 import android.hardware.usb.UsbAccessory
+import android.hardware.usb.UsbDevice
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
@@ -53,24 +54,25 @@ fun DevicesList(
     }
 }
 
+//@Composable
+//fun DevicesList(
+//    list: List<UsbDevice>,
+//    serial: SerialCommunication,
+//) {
+//    list.forEach {
+//        DevicesListItem(
+//            name = it.deviceName,
+//            description = (it.productName ?: it.deviceName)
+//        ) {
+////            serial.requestUsbPermission(it)
+//        }
+//    }
+//}
+
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun DevicesListItem(name: String, description: String, onClick: () -> Unit = {}) {
-//    Card(
-//        border = BorderStroke(0.dp, Color.Transparent),
-//        modifier = Modifier.clickable(onClick = onClick)
-//    ) {
-//        Text(
-//            name,
-//            fontSize = 20.sp,
-//            color = Color.Black
-//        )
-//        Text(
-//            description,
-//            fontSize = 16.sp,
-//            color = Color.Gray
-//        )
-//    }
+
     ListItem(
         secondaryText = { Text(name) },
         text = { Text(description) },
