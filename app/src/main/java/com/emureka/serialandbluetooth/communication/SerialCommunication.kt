@@ -1,16 +1,27 @@
 package com.emureka.serialandbluetooth.communication
 
 import android.app.PendingIntent
-import android.content.*
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.hardware.usb.UsbAccessory
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
+import android.os.Parcel
+import android.os.Parcelable
 import android.util.Log
 import androidx.activity.ComponentActivity
+import androidx.core.content.ContextCompat.getSystemService
 import com.emureka.serialandbluetooth.service.SerialConnectionService
-import java.io.FileDescriptor
-import java.io.FileInputStream
-import java.io.FileOutputStream
+import com.hoho.android.usbserial.driver.UsbSerialDriver
+import com.hoho.android.usbserial.driver.UsbSerialPort
+import com.hoho.android.usbserial.driver.UsbSerialProber
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+
 
 class SerialCommunication(
     private val activity: ComponentActivity
@@ -20,62 +31,66 @@ class SerialCommunication(
     }
 
     private val usbManager = activity.getSystemService(Context.USB_SERVICE) as UsbManager
+    private lateinit var port: UsbSerialPort
+    private lateinit var driver: UsbSerialDriver
 
     private val usbReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             if (ACTION_USB_PERMISSION == intent.action) {
                 synchronized(this) {
-                    val accessory: UsbAccessory? = intent.getParcelableExtra(UsbManager.EXTRA_ACCESSORY)
+                    val accessory: UsbDevice? = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE)
 
                     if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
                         accessory?.apply {
+                            val connection = usbManager.openDevice(accessory)
+                            Log.i("USB", "opened1")
 
-                            Log.i("USB", "${this.description} ${this.model}")
-                            // create a intent which contain a usbAccessory
-                            val intent = Intent(activity, SerialConnectionService::class.java)
-                            intent.putExtra("Accessory", accessory)
+                            port = driver.ports[0] // Most devices have just one port (port 0)
 
-                            // start service
-                            activity.startService(intent)
+                            port.open(connection)
+                            Log.i("USB", "opened2")
+
+                            port.setParameters(115200, 8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE)
+                            Log.i("USB", "set")
+
+                            CoroutineScope(Dispatchers.IO).launch {
+                                while (true) {
+                                    write("Hello")
+                                    Log.i("USB", "send")
+                                    delay(800)
+                                }
+                            }
                         }
                     } else {
-                        Log.d(ContentValues.TAG, "permission denied for accessory $accessory")
+                        Log.d("USB", "permission denied for accessory $accessory")
                     }
                 }
             }
         }
     }
 
-    fun getAccessoryList(): List<UsbAccessory> {
-        val list = mutableListOf<UsbAccessory>()
-        val array = usbManager.accessoryList
-
-        // from java, need check null
-        if(array != null && array.isNotEmpty()) {
-            array.forEach {
-                list.add(it)
-            }
+    fun openDevice() {
+        // Find all available drivers from attached devices.
+        val availableDrivers = UsbSerialProber.getDefaultProber().findAllDrivers(usbManager)
+        if (availableDrivers.isEmpty()) {
+            return
         }
-        return list.toList()
+
+        // Open a connection to the first available driver.
+        driver = availableDrivers[0]
+
+        requestUsbPermission(driver.device)
+        return
     }
 
-    fun getDeviceList(): List<UsbDevice> {
-        val list = mutableListOf<UsbDevice>()
-        val array = usbManager.deviceList
-
-        // from java, need check null
-        if(array != null && array.isNotEmpty()) {
-            array.forEach {
-                list.add(it.value)
-            }
-        }
-        return list.toList()
+    fun write(text: String) {
+        port.write(text.toByteArray(), 0);
     }
 
-    fun requestUsbPermission(accessory: UsbAccessory) {
+    private fun requestUsbPermission(accessory: UsbDevice) {
         val usbIntent = Intent(ACTION_USB_PERMISSION)
 
-        val permissionIntent: PendingIntent? = PendingIntent.getBroadcast(activity, 1, usbIntent, PendingIntent.FLAG_IMMUTABLE)
+        val permissionIntent: PendingIntent? = PendingIntent.getBroadcast(activity, 1, usbIntent, PendingIntent.FLAG_MUTABLE)
         val filter = IntentFilter(ACTION_USB_PERMISSION)
 
         activity.registerReceiver(usbReceiver, filter)
