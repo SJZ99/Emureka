@@ -79,15 +79,27 @@ class SerialCommunication private constructor (
     }
 
     fun getSerial(): String {
-        return port?.serial ?: ""
+        val availableDrivers = UsbSerialProber.getDefaultProber().findAllDrivers(usbManager)
+        if(availableDrivers.isEmpty()) {
+            return "";
+        }
+        return availableDrivers[0].device.serialNumber ?: ""
     }
 
     fun getDeviceName(): String {
-        return port?.device?.deviceName ?: "Not Found"
+        val availableDrivers = UsbSerialProber.getDefaultProber().findAllDrivers(usbManager)
+        if(availableDrivers.isEmpty()) {
+            return "";
+        }
+        return availableDrivers[0]?.device?.deviceName ?: "Not found"
     }
 
     fun getProductName(): String {
-        return port?.device?.productName ?: ""
+        val availableDrivers = UsbSerialProber.getDefaultProber().findAllDrivers(usbManager)
+        if(availableDrivers.isEmpty()) {
+            return "";
+        }
+        return availableDrivers[0].device.productName ?: ""
     }
 
     private fun requestUsbPermission(accessory: UsbDevice, activity: ComponentActivity) {

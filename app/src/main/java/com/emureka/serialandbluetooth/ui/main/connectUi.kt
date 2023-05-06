@@ -1,6 +1,8 @@
 package com.emureka.serialandbluetooth.ui.main
 
 import androidx.activity.ComponentActivity
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.*
@@ -67,12 +69,14 @@ fun UsbInfo(
             deviceName = serial.getDeviceName()
             productName = serial.getProductName()
             serialDes = serial.getSerial()
-            delay(500)
+            delay(300)
         }
     }
 
     Row(
-        modifier = Modifier.padding(15.dp)
+        modifier = Modifier
+            .border(BorderStroke(3.dp, MaterialTheme.colors.onBackground))
+            .padding(15.dp)
     ) {
         Column() {
             Row {

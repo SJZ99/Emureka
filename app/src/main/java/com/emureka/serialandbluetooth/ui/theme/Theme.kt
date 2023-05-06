@@ -1,22 +1,25 @@
 package com.emureka.serialandbluetooth.ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material.Colors
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 
 private val DarkColorPalette = darkColors(
     primary = Emu2,
     primaryVariant = Emu,
-    secondary = Grass
+    secondary = Grass,
+    onBackground = Color.White
 )
 
 private val LightColorPalette = lightColors(
     primary = Emu,
     primaryVariant = Emu2,
-    secondary = Grass
-
+    secondary = Grass,
+    onBackground = Color.Black
     /* Other default colors to override
     background = Color.White,
     surface = Color.White,

@@ -51,10 +51,14 @@ class Bird : Service() {
         serviceScope.launch {
             var cuml = 0
             while (true) {
+                if(!PoseTracking.isReset()) {
+                    delay(200)
+                    continue
+                };
                 PoseTracking.update_current_state(dataStore)
 //                Log.d("Bird", "$isSoundOn $emuState")
 //                Log.d("Bird"," " + PoseTracking.currStat)
-                if(isSoundOn.get() && (emuState.get() != 0)&&PoseTracking.isReset()) {
+                if(isSoundOn.get() && (emuState.get() != 0)) {
                     cuml += 1
                     if(cuml>=5) {
                         bird.start()

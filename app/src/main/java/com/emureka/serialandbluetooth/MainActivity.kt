@@ -20,9 +20,11 @@ import com.emureka.serialandbluetooth.ui.main.*
 import kotlinx.coroutines.delay
 
 class MainActivity : ComponentActivity() {
+
     private lateinit var pose : PoseTracking
     private lateinit var dataStore: MyDataStore
     private lateinit var surface: SurfaceView
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -31,8 +33,6 @@ class MainActivity : ComponentActivity() {
         pose = PoseTracking(this)
         surface = SurfaceView(this)
         dataStore = MyDataStore.getInstance(this)
-
-        startService(Intent(this, Bird::class.java))
 
         setContent {
 
@@ -51,7 +51,11 @@ class MainActivity : ComponentActivity() {
                 when(content) {
                     // Home
                     Content.MAIN -> {
-
+                        LaunchedEffect(true) {
+                            if(!PoseTracking.isReset()) {
+                                dataStore.updateEmuState(0)
+                            }
+                        }
                         MainUi(emuState = setting.value.emuState)
                     }
 
