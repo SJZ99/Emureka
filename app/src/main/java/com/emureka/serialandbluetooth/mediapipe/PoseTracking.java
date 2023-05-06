@@ -22,6 +22,9 @@ import com.google.mediapipe.framework.PacketGetter;
 import com.google.mediapipe.glutil.EglManager;
 import com.google.protobuf.InvalidProtocolBufferException;
 
+import java.util.Arrays;
+import java.util.Objects;
+
 
 public class PoseTracking {
     static final String TAG = "Debug";
@@ -71,7 +74,7 @@ public class PoseTracking {
     static double ref_head_z=0;
     static double dist_correction =0;
     static double ref_fore = 0;
-    public static int currStat = 0;
+    static boolean had_reset = false;
     static double[] movingAvg = {0,0,0};
     public static double[] poseOffset = {0, 0, 0};
 
@@ -113,7 +116,6 @@ public class PoseTracking {
                         getPoseValue(landmarks,mode,ref_head_x,ref_head_z,ref_head_sh_dist);
                     } catch (InvalidProtocolBufferException e) {
                         Log.e(TAG, "Couldn't Exception received - " + e);
-                        return;
                     }
                 });
 //        }
@@ -143,6 +145,10 @@ public class PoseTracking {
         ref_head_sh_dist = 0;
         ref_head_z = 0;
         ref_fore = 0;
+        had_reset = true;
+    }
+    public static boolean isReset(){
+        return had_reset;
     }
 
     private static void getPoseValue(LandmarkProto.NormalizedLandmarkList landmarks, String mode, double _ref_head_x, double _ref_head_z, double _ref_head_sh_dist) {
@@ -157,7 +163,7 @@ public class PoseTracking {
             }
 
         }
-        if(mode == "side"||auto_mode=="side"){
+        if(mode.equals("side") || Objects.equals(auto_mode, "side")){
             // TODO: 2023/5/4  另外一肩好像看不太清楚
             double body_y = (landmarks.getLandmark(11).getY()+landmarks.getLandmark(12).getY())/2;
             double head_x = (landmarks.getLandmark(0).getX());
@@ -211,7 +217,6 @@ public class PoseTracking {
             }
         }
         filter(a);
-        //return a;
     }
 
     /**
@@ -219,9 +224,9 @@ public class PoseTracking {
      */
     public static void update_current_state(MyDataStore dataStore){
         Log.d(TAG, "get_current_state: foreshortening:"+movingAvg[0]+" shoulder_shrug: "+movingAvg[1]+" head_dist"+movingAvg[2]);
-        currStat = 0;
+        int currStat = 0;
 
-        for(int i = 0; i < poseOffset.length; ++i) poseOffset[i] = 0;
+        Arrays.fill(poseOffset, 0);
 
         // TODO: 2023/5/1  Mode 要手按很麻煩 感覺可以自動 
         if(mode.equals("side") || auto_mode.equals("side")){
@@ -274,7 +279,7 @@ public class PoseTracking {
                 currStat = 3;
             }
         }
-        Log.d(TAG, "update_current_state: EMU State" +currStat);
+        Log.d(TAG, "update_current_state: EMU State" + currStat);
         dataStore.updateEmuState(currStat);
     }
     private static void filter(double[] _a){

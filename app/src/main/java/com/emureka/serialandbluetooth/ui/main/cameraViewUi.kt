@@ -136,7 +136,7 @@ fun CameraView(
                         }
                         reset = true
                         PoseTracking.set_ref()
-                        while(PoseTracking.reset);
+                        delay(1000)
                         Log.d("Reset", "finished")
                         reset = false
                     }
