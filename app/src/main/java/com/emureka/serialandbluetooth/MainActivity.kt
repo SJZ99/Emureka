@@ -71,6 +71,7 @@ class MainActivity : ComponentActivity() {
                     // Camera
                     Content.CAMERA -> {
                         LaunchedEffect(key1 = content) {
+                            pose.requestPermission()
                             pose.onPause()
                             delay(50)
                             pose.onResume()
