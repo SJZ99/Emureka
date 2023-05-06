@@ -1,7 +1,6 @@
 package com.emureka.serialandbluetooth.mediapipe;
 
 import android.app.Activity;
-import android.content.pm.ApplicationInfo;
 import android.graphics.SurfaceTexture;
 import android.util.Log;
 import android.util.Size;
@@ -35,15 +34,10 @@ public class PoseTracking {
 
     // private static final CameraHelper.CameraFacing CAMERA_FACING = CameraHelper.CameraFacing.FRONT;
     private static final CameraHelper.CameraFacing CAMERA_FACING = CameraHelper.CameraFacing.FRONT;
-    // Flips the camera-preview frames vertically before sending them into FrameProcessor to be
-    // processed in a MediaPipe graph, and flips the processed frames back when they are displayed.
-    // This is needed because OpenGL represents images assuming the image origin is at the bottom-left
-    // corner, whereas MediaPipe in general assumes the image origin is at top-left.
     private static final boolean FLIP_FRAMES_VERTICALLY = true;
     //temp const
 
     static {
-        // Load all native libraries needed by the app.
         System.loadLibrary("mediapipe_jni");
         System.loadLibrary("opencv_java3");
     }
@@ -61,7 +55,7 @@ public class PoseTracking {
     // consumed by {@link FrameProcessor} and the underlying MediaPipe graph.
     private ExternalTextureConverter converter;
     // ApplicationInfo for retrieving metadata defined in the manifest.
-    private ApplicationInfo applicationInfo;
+
     // Handles camera access via the {@link CameraX} Jetpack support library.
     private CameraXPreviewHelper cameraHelper;
     public static String mode = "auto";
@@ -159,10 +153,22 @@ public class PoseTracking {
         double[] a = {0,0,0};
         if(mode.equals("auto")){
             // TODO: 2023/5/4 往前太多會變mode
-            if(!auto_mode.equals((Math.abs(landmarks.getLandmark(11).getX()-landmarks.getLandmark(12).getX()))<0.25? "side":"front")){
-                auto_mode  = (Math.abs(landmarks.getLandmark(11).getX()-landmarks.getLandmark(12).getX()))<0.25? "side":"front";
-                Log.d(TAG, "Auto Mode Changed " +auto_mode);
+
+            if(auto_mode.equals("side")){
+//                Log.d(TAG, "auto side the" +(0.1+dist_correction*1.2));
+                if((Math.abs(landmarks.getLandmark(11).getX()-landmarks.getLandmark(12).getX()))>0.1+dist_correction*1.2){
+                    auto_mode = "front";
+                }
             }
+            else{
+                if((Math.abs(landmarks.getLandmark(11).getX()-landmarks.getLandmark(12).getX()))<0.3){
+                    auto_mode = "side";
+                }
+            }
+//                !auto_mode.equals((Math.abs(landmarks.getLandmark(11).getX()-landmarks.getLandmark(12).getX()))<0.25? "side":"front")){
+//                auto_mode  = (Math.abs(landmarks.getLandmark(11).getX()-landmarks.getLandmark(12).getX()))<0.25? "side":"front";
+//                Log.d(TAG, "Auto Mode Changed " +auto_mode);
+
 
         }
         if(mode.equals("side") || Objects.equals(auto_mode, "side")){
@@ -172,7 +178,15 @@ public class PoseTracking {
             double head_y = (landmarks.getLandmark(0).getY());
             isLeft = landmarks.getLandmark(11).getZ()>landmarks.getLandmark(12).getZ();
 //            Log.d(TAG, "isLeft"+isLeft);
-            double body_x = isLeft? landmarks.getLandmark(12).getX():landmarks.getLandmark(11).getX();
+//            dist_correction = isLeft?landmarks.getLandmark(11).getZ():landmarks.getLandmark(12).getZ();
+            if(isLeft){
+                dist_correction = Math.sqrt(Math.pow(landmarks.getLandmark(11).getX()-landmarks.getLandmark(0).getX(),2)+Math.pow(landmarks.getLandmark(11).getY()-landmarks.getLandmark(0).getY(),2));
+            }
+            else {
+                dist_correction = Math.sqrt(Math.pow(landmarks.getLandmark(12).getX()-landmarks.getLandmark(0).getX(),2)+Math.pow(landmarks.getLandmark(12).getY()-landmarks.getLandmark(0).getY(),2));
+            }
+//            Log.d("Side",""+dist_correction);
+            double body_x = isLeft? landmarks.getLandmark(11).getZ():landmarks.getLandmark(12).getZ();
             double foreshortening = body_x-head_x;
             double shoulder_shrug = (head_y - body_y) - _ref_head_sh_dist;
             double head_dist =  head_x-_ref_head_x;
@@ -227,35 +241,39 @@ public class PoseTracking {
     public static void update_current_state(MyDataStore dataStore){
         Log.d(TAG, "get_current_state: foreshortening:"+movingAvg[0]+" shoulder_shrug: "+movingAvg[1]+" head_dist"+movingAvg[2]);
         int currStat = 0;
-
         Arrays.fill(poseOffset, 0);
 
         // TODO: 2023/5/1  Mode 要手按很麻煩 感覺可以自動 
         if(mode.equals("side") || auto_mode.equals("side")){
-            if(movingAvg[1]>=0.02){
+
+            double th1 = 0.017+0.02*dist_correction;
+            double th2 = 0.2+0.4*dist_correction;
+            double th3 = 0.2+0.4*dist_correction;
+            Log.d(TAG, "dc"+dist_correction+"Side threshold "+th1 + " "+th2+" "+th3);
+            if(movingAvg[1]>=th1){
                 Log.d(TAG, "get_current_state: shoulder_shrug");
                 poseOffset[1] = movingAvg[1] - 0.02;
                 currStat = 2;
             }
             if(isLeft){
-                if(movingAvg[0]<=-0.25){
+                if(movingAvg[0]<=-th2){
                     Log.d(TAG, "Side: foreshortening");
                     poseOffset[0] = movingAvg[0] - (-0.25);
                     currStat = 1;
                     // TODO: 2023/5/1  會受到距離影響
                 }
-                if(movingAvg[2]>=0.3){
+                if(movingAvg[2]>=th3){
                     Log.d(TAG, "get_current_state: head_dist");
                     poseOffset[2] = movingAvg[2] - 0.3;
                     currStat = 3;
                 }
             } else{
-                if(movingAvg[0]>=0.25){
+                if(movingAvg[0]>=th2){
                     Log.d(TAG, "Side: foreshortening");
                     poseOffset[0] = movingAvg[0] - 0.25;
                     currStat = 1;
                 }
-                if(movingAvg[2]<=-0.15){
+                if(movingAvg[2]<=-th3){
                     Log.d(TAG, "get_current_state: head_dist");
                     poseOffset[2] = movingAvg[2] - (-0.15);
                     currStat = 3;
