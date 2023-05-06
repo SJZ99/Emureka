@@ -156,8 +156,6 @@ public class PoseTracking {
         if(counter!=0)Log.d(TAG, "getPoseValue: "+counter);
         double[] a = {0,0,0};
         if(mode.equals("auto")){
-            // TODO: 2023/5/4 往前太多會變mode
-
             if(auto_mode.equals("side")){
 //                Log.d(TAG, "auto side the" +(0.1+dist_correction*1.2));
                 if((Math.abs(landmarks.getLandmark(11).getX()-landmarks.getLandmark(12).getX()))>0.1+dist_correction*1.2){
@@ -169,10 +167,6 @@ public class PoseTracking {
                     auto_mode = "side";
                 }
             }
-//                !auto_mode.equals((Math.abs(landmarks.getLandmark(11).getX()-landmarks.getLandmark(12).getX()))<0.25? "side":"front")){
-//                auto_mode  = (Math.abs(landmarks.getLandmark(11).getX()-landmarks.getLandmark(12).getX()))<0.25? "side":"front";
-//                Log.d(TAG, "Auto Mode Changed " +auto_mode);
-
 
         }
         if(mode.equals("side") || Objects.equals(auto_mode, "side")){
@@ -182,7 +176,6 @@ public class PoseTracking {
             double head_y = (landmarks.getLandmark(0).getY());
             isLeft = landmarks.getLandmark(11).getZ()>landmarks.getLandmark(12).getZ();
 //            Log.d(TAG, "isLeft"+isLeft);
-//            dist_correction = isLeft?landmarks.getLandmark(11).getZ():landmarks.getLandmark(12).getZ();
             if(isLeft){
                 dist_correction = Math.sqrt(Math.pow(landmarks.getLandmark(11).getX()-landmarks.getLandmark(0).getX(),2)+Math.pow(landmarks.getLandmark(11).getY()-landmarks.getLandmark(0).getY(),2));
             }
@@ -247,7 +240,6 @@ public class PoseTracking {
         int currStat = 0;
         Arrays.fill(poseOffset, 0);
 
-        // TODO: 2023/5/1  Mode 要手按很麻煩 感覺可以自動 
         if(mode.equals("side") || auto_mode.equals("side")){
 
             double th1 = 0.017+0.02*dist_correction;
