@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.SurfaceView
+import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
@@ -35,6 +36,7 @@ class MainActivity : ComponentActivity() {
         dataStore = MyDataStore.getInstance(this)
 
         startService(Intent(this, Bird::class.java))
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         setContent {
 
@@ -83,9 +85,9 @@ class MainActivity : ComponentActivity() {
 
     }
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         print(permissions[0])
         print("**************************")
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         pose.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
     override fun onPause(){
