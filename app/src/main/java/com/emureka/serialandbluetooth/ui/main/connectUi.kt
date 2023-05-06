@@ -22,6 +22,21 @@ fun Connect(
     scaffoldState: ScaffoldState,
     activity: ComponentActivity
 ) {
+    var input by remember {
+        mutableStateOf("")
+    }
+
+    LaunchedEffect(true) {
+        while (true) {
+            if(serial.isConnect()) {
+                serial.read()
+                input = serial.input.toString()
+            }
+            delay(400);
+
+        }
+    }
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxSize()
@@ -44,6 +59,8 @@ fun Connect(
         ) {
             Text(text = "Connect via USB")
         }
+
+        Text(input)
     }
 }
 
@@ -75,6 +92,7 @@ fun UsbInfo(
 
     Row(
         modifier = Modifier
+            .padding(15.dp)
             .border(BorderStroke(3.dp, MaterialTheme.colors.onBackground))
             .padding(15.dp)
     ) {
@@ -104,6 +122,5 @@ fun UsbInfo(
             }
 
         }
-
     }
 }

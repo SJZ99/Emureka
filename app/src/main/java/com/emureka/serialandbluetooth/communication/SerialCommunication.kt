@@ -14,7 +14,6 @@ import com.hoho.android.usbserial.driver.UsbSerialDriver
 import com.hoho.android.usbserial.driver.UsbSerialPort
 import com.hoho.android.usbserial.driver.UsbSerialProber
 
-
 class SerialCommunication private constructor (
     context: Context
 ) {
@@ -32,6 +31,7 @@ class SerialCommunication private constructor (
     private val usbManager = context.getSystemService(Context.USB_SERVICE) as UsbManager
     private var port: UsbSerialPort? = null
     private lateinit var driver: UsbSerialDriver
+    val input = ByteArray(1024)
 
     private val usbReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -78,10 +78,18 @@ class SerialCommunication private constructor (
         port?.write(text.toByteArray(), 0);
     }
 
+    fun read() {
+        port?.read(input, 0)
+    }
+
+    fun isConnect(): Boolean {
+        return port != null
+    }
+
     fun getSerial(): String {
         val availableDrivers = UsbSerialProber.getDefaultProber().findAllDrivers(usbManager)
         if(availableDrivers.isEmpty()) {
-            return "";
+            return ""
         }
         return availableDrivers[0].device.serialNumber ?: ""
     }
@@ -89,7 +97,7 @@ class SerialCommunication private constructor (
     fun getDeviceName(): String {
         val availableDrivers = UsbSerialProber.getDefaultProber().findAllDrivers(usbManager)
         if(availableDrivers.isEmpty()) {
-            return "";
+            return "Not found";
         }
         return availableDrivers[0]?.device?.deviceName ?: "Not found"
     }

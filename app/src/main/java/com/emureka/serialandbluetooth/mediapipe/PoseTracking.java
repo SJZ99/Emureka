@@ -97,7 +97,7 @@ public class PoseTracking {
                         OUTPUT_VIDEO_STREAM_NAME);
         processor.getVideoSurfaceOutput().setFlipY(FLIP_FRAMES_VERTICALLY);
 
-        PermissionHelper.checkAndRequestCameraPermissions(context);
+//        PermissionHelper.checkAndRequestCameraPermissions(context);
 
         AndroidPacketCreator packetCreator = processor.getPacketCreator();
         processor.addPacketCallback(
@@ -115,6 +115,10 @@ public class PoseTracking {
                     }
                 });
 //        }
+    }
+
+    public void requestPermission() {
+        PermissionHelper.checkAndRequestCameraPermissions(context);
     }
 
     public static void set_mode(int mode) {
