@@ -305,10 +305,10 @@ public class PoseTracking {
     private static void filter(double[] _a){
         for(int i =0;i<3;i++)movingAvg[i] = 0.8*movingAvg[i]+0.2*_a[i];
     }
-    public static int[] get_servo_angles(){
+    public static String get_servo_angles(){
         int[] servo_angles = {0,0,0,0,0,0};
 //        Log.d(TAG, "get_servo_angles: ");
-        // TODO: 2023/5/6 改成直立的 offset
+
 
         // TODO: 2023/5/6 BASE
         if(mode.equals("side")||(mode.equals("auto")&&auto_mode.equals("side"))){
@@ -326,8 +326,9 @@ public class PoseTracking {
         if(currStat!=0){
             servo_angles[5] += 90;
         }
-        Log.d("Servo:", servo_angles[0]+" "+servo_angles[1]+" "+servo_angles[2]+" "+servo_angles[3] +" "+servo_angles[4]+" "+servo_angles[5] );
-        return servo_angles;
+        String s = servo_angles[0] + " " + servo_angles[1] + " " + servo_angles[2] + " " + servo_angles[3] + " " + servo_angles[4] + " " + servo_angles[5];
+        Log.d("Servo:", s);
+        return s;
     }
 
     public void onResume() {

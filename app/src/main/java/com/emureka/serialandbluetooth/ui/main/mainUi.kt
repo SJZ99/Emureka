@@ -15,9 +15,14 @@ fun MainUi(
     emuState: Int
 ) {
     val img = if(emuState == 0) {
-        R.drawable.emu
-    } else {
-        R.drawable.emulong
+        R.drawable.s0
+    } else if(emuState == 1) {
+        R.drawable.s1
+    } else if(emuState == 2) {
+        R.drawable.s2
+    }
+    else{
+        R.drawable.s3
     }
 
     val color = if(MaterialTheme.colors.isLight) {
