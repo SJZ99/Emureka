@@ -60,6 +60,19 @@ class SerialCommunication private constructor (
         }
     }
 
+    private val detachedReceiver: BroadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+
+            if (UsbManager.ACTION_USB_DEVICE_DETACHED == intent.action) {
+                val device: UsbDevice? = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE)
+                device?.apply {
+                    port?.close()
+                    port = null
+                }
+            }
+        }
+    }
+
     fun openDevice(activity: ComponentActivity): Boolean {
         // Find all available drivers from attached devices.
         val availableDrivers = UsbSerialProber.getDefaultProber().findAllDrivers(usbManager)
@@ -86,28 +99,33 @@ class SerialCommunication private constructor (
         return port != null
     }
 
-    fun getSerial(): String {
+    fun getManufacturer(): String {
         val availableDrivers = UsbSerialProber.getDefaultProber().findAllDrivers(usbManager)
         if(availableDrivers.isEmpty()) {
-            return ""
+            return "Not found"
         }
-        return availableDrivers[0].device.serialNumber ?: ""
+        return availableDrivers[0]?.device?.manufacturerName ?: "Not found"
     }
 
     fun getDeviceName(): String {
+
         val availableDrivers = UsbSerialProber.getDefaultProber().findAllDrivers(usbManager)
-        if(availableDrivers.isEmpty()) {
+
+        if (availableDrivers.isEmpty()) {
             return "Not found";
         }
+//        availableDrivers[0]?.device?.deviceName
         return availableDrivers[0]?.device?.deviceName ?: "Not found"
+//        return "Not found"
     }
+
 
     fun getProductName(): String {
         val availableDrivers = UsbSerialProber.getDefaultProber().findAllDrivers(usbManager)
         if(availableDrivers.isEmpty()) {
-            return "";
+            return "Not found";
         }
-        return availableDrivers[0].device.productName ?: ""
+        return availableDrivers[0]?.device?.productName ?: "Not found"
     }
 
     private fun requestUsbPermission(accessory: UsbDevice, activity: ComponentActivity) {
@@ -117,6 +135,7 @@ class SerialCommunication private constructor (
         val filter = IntentFilter(ACTION_USB_PERMISSION)
 
         activity.registerReceiver(usbReceiver, filter)
+        activity.registerReceiver(detachedReceiver, IntentFilter(UsbManager.ACTION_USB_DEVICE_DETACHED))
 
         usbManager.requestPermission(accessory, permissionIntent)
     }

@@ -30,7 +30,7 @@ fun Connect(
         while (true) {
             if(serial.isConnect()) {
                 serial.read()
-                input = serial.input.toString()
+                input = String(serial.input)
             }
             delay(400);
 
@@ -70,22 +70,22 @@ fun UsbInfo(
 ) {
 
     var deviceName by remember {
-        mutableStateOf(serial.getDeviceName())
+        mutableStateOf("Not found")
     }
 
     var productName by remember {
-        mutableStateOf(serial.getProductName())
+        mutableStateOf("Not found")
     }
 
-    var serialDes by remember {
-        mutableStateOf(serial.getSerial())
+    var manufacturer by remember {
+        mutableStateOf("Not found")
     }
 
-    LaunchedEffect(key1 = deviceName) {
+    LaunchedEffect(true) {
         while(true) {
             deviceName = serial.getDeviceName()
             productName = serial.getProductName()
-            serialDes = serial.getSerial()
+            manufacturer = serial.getManufacturer()
             delay(300)
         }
     }
@@ -106,18 +106,18 @@ fun UsbInfo(
             }
 
             Row {
-                Text("Product Name: ")
+                Text("Manufacturer: ")
                 Text(
                     fontStyle = FontStyle.Italic,
-                    text = productName
+                    text = manufacturer
                 )
             }
 
             Row {
-                Text("Serial: ")
+                Text("Product Name: ")
                 Text(
                     fontStyle = FontStyle.Italic,
-                    text = serialDes
+                    text = productName
                 )
             }
 
