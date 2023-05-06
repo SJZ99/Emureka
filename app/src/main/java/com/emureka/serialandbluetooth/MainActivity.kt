@@ -34,6 +34,8 @@ class MainActivity : ComponentActivity() {
         surface = SurfaceView(this)
         dataStore = MyDataStore.getInstance(this)
 
+        startService(Intent(this, Bird::class.java))
+
         setContent {
 
             val setting = dataStore.settingsFlow.collectAsState(initial = Setting())

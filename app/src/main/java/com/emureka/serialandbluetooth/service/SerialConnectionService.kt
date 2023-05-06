@@ -45,7 +45,6 @@ class SerialConnectionService : Service() {
 
         scope.launch {
             while (true) {
-
                 serial.write("$emuState ${PoseTracking.poseOffset[0]} ${PoseTracking.poseOffset[1]} ${PoseTracking.poseOffset[2]}\n")
                 delay(500)
             }

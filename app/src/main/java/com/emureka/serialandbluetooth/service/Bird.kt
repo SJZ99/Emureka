@@ -58,7 +58,7 @@ class Bird : Service() {
                 PoseTracking.update_current_state(dataStore)
 //                Log.d("Bird", "$isSoundOn $emuState")
 //                Log.d("Bird"," " + PoseTracking.currStat)
-                if(isSoundOn.get() && (emuState.get() != 0)) {
+                if(isSoundOn.get() && (emuState.get() != 0) && PoseTracking.isReset()) {
                     cuml += 1
                     if(cuml>=5) {
                         bird.start()

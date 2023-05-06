@@ -102,7 +102,9 @@ public class PoseTracking {
                         INPUT_VIDEO_STREAM_NAME,
                         OUTPUT_VIDEO_STREAM_NAME);
         processor.getVideoSurfaceOutput().setFlipY(FLIP_FRAMES_VERTICALLY);
-        PermissionHelper.checkAndRequestCameraPermissions(context);
+
+//        PermissionHelper.checkAndRequestCameraPermissions(context);
+
         AndroidPacketCreator packetCreator = processor.getPacketCreator();
         processor.addPacketCallback(
                 OUTPUT_LANDMARKS_STREAM_NAME,
@@ -293,6 +295,11 @@ public class PoseTracking {
         converter.setConsumer(processor);
         if (PermissionHelper.cameraPermissionsGranted(context)) {
             startCamera();
+        } else {
+            PermissionHelper.checkAndRequestCameraPermissions(context);
+            if (PermissionHelper.cameraPermissionsGranted(context)) {
+                startCamera();
+            }
         }
     }
 
