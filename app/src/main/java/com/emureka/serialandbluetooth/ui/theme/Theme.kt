@@ -13,8 +13,8 @@ private val DarkColorPalette = darkColors(
 )
 
 private val LightColorPalette = lightColors(
-    primary = Emu,
-    primaryVariant = Emu2,
+    primary = Emu_light,
+    primaryVariant = Emu2_light,
     secondary = Grass
 
     /* Other default colors to override
