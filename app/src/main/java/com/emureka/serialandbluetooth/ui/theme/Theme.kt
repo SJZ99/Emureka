@@ -16,10 +16,12 @@ private val DarkColorPalette = darkColors(
 )
 
 private val LightColorPalette = lightColors(
-    primary = Emu,
-    primaryVariant = Emu2,
+
+    primary = Emu_light,
+    primaryVariant = Emu2_light,
     secondary = Grass,
-    onBackground = Color.Black
+    onBackground = Color.Black,
+
     /* Other default colors to override
     background = Color.White,
     surface = Color.White,
