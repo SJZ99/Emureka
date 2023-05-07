@@ -24,6 +24,8 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import java.util.Arrays;
 import java.util.Objects;
 
+import kotlin.UByteArray;
+
 
 public class PoseTracking {
     static final String TAG = "Debug";
@@ -61,7 +63,7 @@ public class PoseTracking {
     public static String mode = "auto";
     static String auto_mode = "";
     public static boolean reset = false;
-    static int counter = 0;
+    static int counter = 0,currStat = 0;
     static boolean isLeft = false;
     static double ref_head_x = 0;
     static double ref_head_sh_dist = 0;
@@ -69,7 +71,10 @@ public class PoseTracking {
     static double dist_correction =0;
     static double ref_fore = 0;
     static boolean had_reset = false;
+    static String debug_angle_string = "";
+
     static double[] movingAvg = {0,0,0};
+
     public static double[] poseOffset = {0, 0, 0};
 
     Activity context;
@@ -169,7 +174,7 @@ public class PoseTracking {
             }
 
         }
-        if(mode.equals("side") || Objects.equals(auto_mode, "side")){
+        if(mode.equals("side") ||(mode.equals("auto")&&auto_mode.equals("side"))){
             // TODO: 2023/5/4  另外一肩好像看不太清楚
             double body_y = (landmarks.getLandmark(11).getY()+landmarks.getLandmark(12).getY())/2;
             double head_x = (landmarks.getLandmark(0).getX());
@@ -183,7 +188,7 @@ public class PoseTracking {
                 dist_correction = Math.sqrt(Math.pow(landmarks.getLandmark(12).getX()-landmarks.getLandmark(0).getX(),2)+Math.pow(landmarks.getLandmark(12).getY()-landmarks.getLandmark(0).getY(),2));
             }
 //            Log.d("Side",""+dist_correction);
-            double body_x = isLeft? landmarks.getLandmark(11).getZ():landmarks.getLandmark(12).getZ();
+            double body_x = isLeft? landmarks.getLandmark(11).getX():landmarks.getLandmark(12).getX();
             double foreshortening = body_x-head_x;
             double shoulder_shrug = (head_y - body_y) - _ref_head_sh_dist;
             double head_dist =  head_x-_ref_head_x;
@@ -225,8 +230,6 @@ public class PoseTracking {
                 ref_head_z += head_z*0.05;
                 ref_head_sh_dist += (head_y - body_y)*0.05;
                 ref_fore += foreshortening*0.05;
-
-
             }
         }
         filter(a);
@@ -236,43 +239,45 @@ public class PoseTracking {
      * return state
      */
     public static void update_current_state(MyDataStore dataStore){
-        Log.d(TAG, "get_current_state: foreshortening:"+movingAvg[0]+" shoulder_shrug: "+movingAvg[1]+" head_dist"+movingAvg[2]);
-        int currStat = 0;
+        Log.d(auto_mode, "current: f:"+movingAvg[0]+" shrug: "+movingAvg[1]+" dist:"+movingAvg[2]);
+        currStat = 0;
         Arrays.fill(poseOffset, 0);
 
-        if(mode.equals("side") || auto_mode.equals("side")){
+        if(mode.equals("side") || (mode.equals("auto")&&auto_mode.equals("side"))){
 
+            double th0 = 0.17+0.25*dist_correction;
             double th1 = 0.017+0.02*dist_correction;
-            double th2 = 0.2+0.4*dist_correction;
-            double th3 = 0.2+0.4*dist_correction;
-            Log.d(TAG, "dc"+dist_correction+"Side threshold "+th1 + " "+th2+" "+th3);
+            double th2 = 0.2+0.3*dist_correction;
+//            Log.d(TAG, "dc"+dist_correction+"Side threshold "+th0 + " "+th1+" "+th2);
             if(movingAvg[1]>=th1){
                 Log.d(TAG, "get_current_state: shoulder_shrug");
                 poseOffset[1] = movingAvg[1] - 0.02;
                 currStat = 2;
             }
             if(isLeft){
-                if(movingAvg[0]<=-th2){
-                    Log.d(TAG, "Side: foreshortening");
-                    poseOffset[0] = movingAvg[0] - (-0.25);
+                Log.d("Left","movingAvg -th0"+movingAvg[0]+" "+-th0);
+                if(movingAvg[0]<=-th0){
+                    Log.d("Left", "Side: foreshortening");
+                    poseOffset[0] = -(movingAvg[0] - (-th0));
                     currStat = 1;
                     // TODO: 2023/5/1  會受到距離影響
 
                 }
-                if(movingAvg[2]>=th3){
+                if(movingAvg[2]>=th2){
                     Log.d(TAG, "get_current_state: head_dist");
-                    poseOffset[2] = movingAvg[2] - 0.3;
+                    poseOffset[2] = movingAvg[2] - th2;
                     currStat = 3;
                 }
             } else{
-                if(movingAvg[0]>=th2){
-                    Log.d(TAG, "Side: foreshortening");
-                    poseOffset[0] = movingAvg[0] - 0.25;
+//                Log.d("Right","movingAvg th0"+movingAvg[0]+" "+th0);
+                if(movingAvg[0]>=th0){
+                    Log.d("Right", "Side: foreshortening");
+                    poseOffset[0] = movingAvg[0] - th0;
                     currStat = 1;
                 }
-                if(movingAvg[2]<=-th3){
+                if(movingAvg[2]<=-th2){
                     Log.d(TAG, "get_current_state: head_dist");
-                    poseOffset[2] = movingAvg[2] - (-0.15);
+                    poseOffset[2] = movingAvg[2] - (-th2);
                     currStat = 3;
                 }
             }
@@ -283,7 +288,7 @@ public class PoseTracking {
                 poseOffset[1] = movingAvg[1] - 0.02;
                 currStat = 2;
             }
-            double threshold =0.1*dist_correction/-0.6;
+            double threshold =0.1*dist_correction/-1.3;
 //            Log.d(TAG, "update_current_state: threshold"+(threshold));
             if(movingAvg[0]-ref_fore>=threshold){
                 Log.d(TAG, "Front: foreshortening");
@@ -292,16 +297,50 @@ public class PoseTracking {
             }
             if(movingAvg[2]<-0.3){
                 Log.d(TAG, "get_current_state: head_dist");
-                poseOffset[2] = movingAvg[2] - (-0.3);
+                poseOffset[2] = -(movingAvg[2] - (-0.3));
                 currStat = 3;
             }
         }
         Log.d(TAG, "update_current_state: EMU State" + currStat);
+//        Log.d("Offset",poseOffset[0]+" "+poseOffset[1]+" "+poseOffset[2]);
         dataStore.updateEmuState(currStat);
+        get_servo_angles();
     }
     private static void filter(double[] _a){
         for(int i =0;i<3;i++)movingAvg[i] = 0.8*movingAvg[i]+0.2*_a[i];
     }
+    public static String get_servo_angles(){
+        int[] servo_angles = {0,0,0,0,0,0};
+//        Log.d(TAG, "get_servo_angles: ");
+
+
+        // TODO: 2023/5/6 BASE
+        if(mode.equals("side")||(mode.equals("auto")&&auto_mode.equals("side"))){
+            servo_angles[0] +=90;
+        }
+
+        // TODO: 2023/5/6 neck
+
+            servo_angles[1] += Math.min(20,Math.max(0,50*poseOffset[2]));
+            servo_angles[2] += Math.min(30,Math.max(0,100*poseOffset[0]));
+            servo_angles[3] += Math.min(30,Math.max(0,100*poseOffset[0]));
+
+
+        // TODO: 2023/5/6 beak
+        //**invert in STM32
+        if(currStat!=0){
+            servo_angles[5] = 90;
+        }
+
+        debug_angle_string = ""+servo_angles[0]+" "+ servo_angles[1] +" "+servo_angles[2] +" "+servo_angles[3] + " "+servo_angles[4] + " "+servo_angles[5];
+     String s = ""+ (char)(servo_angles[0])+(char)servo_angles[1]+(char)servo_angles[2]+(char)servo_angles[3]+(char)servo_angles[4]+(char)servo_angles[5]+"\0\0\0\0";
+        return s;
+    }
+    //Debug用
+    public static String get_servo_angle_str(){
+        return debug_angle_string;
+    }
+
     public void onResume() {
         converter =
                 new ExternalTextureConverter(

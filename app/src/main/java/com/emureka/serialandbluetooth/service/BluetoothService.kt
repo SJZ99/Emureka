@@ -18,23 +18,15 @@ class BluetoothService : Service() {
 
     override fun onCreate() {
         super.onCreate()
-        Log.d("BT", "created")
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
-        Log.d("BT", "hello1")
         val bt = BluetoothCommunication.getInstance(this)!!
-        Log.d("BT", "hello2")
         CoroutineScope(Dispatchers.IO).launch {
             while(true) {
                 val msg = "Hello"
-                val bm = bt.trySend(msg)
-                if(bm != null && bm.message == msg) {
-                    Log.d("BT", "send")
-                } else {
-                    Log.d("BT", "QQQQ")
-                }
+                bt.trySend(msg)
 
                 delay(500)
             }
