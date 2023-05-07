@@ -257,6 +257,7 @@ public class PoseTracking {
                     poseOffset[0] = movingAvg[0] - (-0.25);
                     currStat = 1;
                     // TODO: 2023/5/1  會受到距離影響
+
                 }
                 if(movingAvg[2]>=th3){
                     Log.d(TAG, "get_current_state: head_dist");

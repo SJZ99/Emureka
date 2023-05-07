@@ -7,6 +7,7 @@ import android.view.SurfaceView
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Button
 import androidx.compose.material.Text
@@ -14,6 +15,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import com.emureka.serialandbluetooth.bluetoothchat.data.chat.AndroidBluetoothController
+import com.emureka.serialandbluetooth.communication.BluetoothCommunication
 import com.emureka.serialandbluetooth.communication.SerialCommunication
 import com.emureka.serialandbluetooth.mediapipe.PoseTracking
 import com.emureka.serialandbluetooth.service.Bird
@@ -30,6 +33,8 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         val serial = SerialCommunication.getInstance(this)
+        val btController = AndroidBluetoothController(this)
+        val bt = BluetoothCommunication.getInstance(this, btController)
 
         pose = PoseTracking(this)
         surface = SurfaceView(this)
@@ -38,11 +43,15 @@ class MainActivity : ComponentActivity() {
         startService(Intent(this, Bird::class.java))
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
+        bt.onCreate(this)
+
         setContent {
 
             val setting = dataStore.settingsFlow.collectAsState(initial = Setting())
 
             var content by remember { mutableStateOf(Content.MAIN) }
+
+            val viewModel = viewModels<BluetoothViewModel>(factoryProducer = { BluetoothViewModelFactory(btController) })
 
             MyScaffold (
                 darkTheme = setting.value.isDark,
@@ -65,7 +74,12 @@ class MainActivity : ComponentActivity() {
 
                     // Connect (USB and bluetooth)
                     Content.CONNECT -> {
-                        Connect(serial, scaffoldState, this@MainActivity)
+                        Connect(
+                            serial = serial,
+                            scaffoldState = scaffoldState,
+                            activity = this@MainActivity,
+                            viewModel = viewModel.value
+                        )
                     }
 
                     // Camera
