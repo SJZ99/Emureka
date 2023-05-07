@@ -3,19 +3,15 @@ package com.emureka.serialandbluetooth.service
 import android.app.Service
 import android.content.Context
 import android.content.Intent
-import android.hardware.usb.UsbAccessory
-import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
 import android.os.IBinder
-import android.os.ParcelFileDescriptor
-import android.util.Log
 import com.emureka.serialandbluetooth.MyDataStore
 import com.emureka.serialandbluetooth.communication.SerialCommunication
 import com.emureka.serialandbluetooth.mediapipe.PoseTracking
-import kotlinx.coroutines.*
-import java.io.FileDescriptor
-import java.io.FileInputStream
-import java.io.FileOutputStream
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class SerialConnectionService : Service() {
 

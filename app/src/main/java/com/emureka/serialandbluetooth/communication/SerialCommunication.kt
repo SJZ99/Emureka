@@ -87,8 +87,8 @@ class SerialCommunication private constructor (
         return true
     }
 
-    fun write(text: String) {
-        port?.write(text.toByteArray(), 0);
+    fun write(command: String) {
+        port?.write(command.toByteArray(), 0);
     }
 
     fun read() {

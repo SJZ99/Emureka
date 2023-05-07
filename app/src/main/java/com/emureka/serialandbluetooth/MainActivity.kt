@@ -2,18 +2,12 @@ package com.emureka.serialandbluetooth
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.SurfaceView
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.*
-import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
 import com.emureka.serialandbluetooth.communication.SerialCommunication
 import com.emureka.serialandbluetooth.mediapipe.PoseTracking
 import com.emureka.serialandbluetooth.service.Bird
@@ -41,7 +35,7 @@ class MainActivity : ComponentActivity() {
         setContent {
 
             val setting = dataStore.settingsFlow.collectAsState(initial = Setting())
-
+            var sended by remember { mutableStateOf("") }
             var content by remember { mutableStateOf(Content.MAIN) }
 
             MyScaffold (
@@ -59,7 +53,12 @@ class MainActivity : ComponentActivity() {
                             if(!PoseTracking.isReset()) {
                                 dataStore.updateEmuState(0)
                             }
+                            while(true) {
+                                sended = PoseTracking.get_servo_angle_str()
+                                delay(100)
+                            }
                         }
+                        Text(text = sended)
                         MainUi(emuState = setting.value.emuState)
                     }
 

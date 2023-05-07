@@ -24,6 +24,8 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import java.util.Arrays;
 import java.util.Objects;
 
+import kotlin.UByteArray;
+
 
 public class PoseTracking {
     static final String TAG = "Debug";
@@ -69,6 +71,7 @@ public class PoseTracking {
     static double dist_correction =0;
     static double ref_fore = 0;
     static boolean had_reset = false;
+    static String debug_angle_string = "";
 
     static double[] movingAvg = {0,0,0};
 
@@ -323,12 +326,18 @@ public class PoseTracking {
 
 
         // TODO: 2023/5/6 beak
+        //**invert in STM32
         if(currStat!=0){
-            servo_angles[5] += 90;
+            servo_angles[5] = 90;
         }
-        String s = servo_angles[0] + " " + servo_angles[1] + " " + servo_angles[2] + " " + servo_angles[3] + " " + servo_angles[4] + " " + servo_angles[5];
-        Log.d("Servo:", s);
+
+        debug_angle_string = ""+servo_angles[0]+" "+ servo_angles[1] +" "+servo_angles[2] +" "+servo_angles[3] + " "+servo_angles[4] + " "+servo_angles[5];
+     String s = ""+ (char)(servo_angles[0])+(char)servo_angles[1]+(char)servo_angles[2]+(char)servo_angles[3]+(char)servo_angles[4]+(char)servo_angles[5]+"\0\0\0\0";
         return s;
+    }
+    //Debug用
+    public static String get_servo_angle_str(){
+        return debug_angle_string;
     }
 
     public void onResume() {
